@@ -232,7 +232,6 @@ class ColorHistogramEngine:
             results.append(channel_mean)
         return results
 
-        return reuslts
     
     def calculate_linear_mean_total(self, imgs: list[str|np.ndarray]):
         img_bgr, img_mask = image_utils.load_imgs_flatten(imgs)
@@ -240,6 +239,47 @@ class ColorHistogramEngine:
             return None
         mean_channel = self.strategy.calculate_mean_channel(img_bgr, img_mask)
         return mean_channel 
+
+    def calculate_circle_mean(self, img_raw: str|Path|np.ndarray):
+        """ computing the circle mean of the channel for single image
+        Parameters:
+            imgs: type supported:
+                - str: image path
+                - np.ndarray: image array from openCV.imread(including BGR or BGRA)
+        Returns: the circle mean of one channel
+       
+        """
+        img_bgr, img_mask = image_utils.load_img(img_raw)
+        if img_bgr is None:
+            return None
+        if self.ignore_transparent:
+            mean_circle= self.strategy.calculate_mean_circle(img_bgr, img_mask)
+        else:
+            mean_circle = self.strategy.calculate_mean_circle(img_bgr, None)
+        return mean_circle  
+
+    def calculate_circle_means(self, imgs: list[str|Path|np.ndarray]):
+        """ computing the circle mean of the channel for single or multiple images
+        Parameters:
+            imgs: various number of images, type supported:
+                - str: image path
+                - np.ndarray: image array from openCV.imread(including BGR or BGRA)
+        Returns: the circle mean of one channel
+       
+        """
+        results = []  
+        for img_raw in imgs:
+            circle_mean =  self.calculate_circle_mean(img_raw)
+            results.append(circle_mean)
+        return results
+
+    
+    def calculate_circle_mean_total(self, imgs: list[str|np.ndarray]):
+        img_bgr, img_mask = image_utils.load_imgs_flatten(imgs)
+        if img_bgr is None:
+            return None
+        circle_mean = self.strategy.calculate_mean_circle(img_bgr, img_mask)
+        return circle_mean 
 
 
     @property

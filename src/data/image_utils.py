@@ -3,6 +3,7 @@
 from pathlib import Path
 import numpy as np
 import cv2
+from PIL import Image
 # default extension support
 _DEFAULT_IMAGE_EXTS = {
     '.png'
@@ -118,4 +119,24 @@ def load_imgs_flatten(img_paths: list[str|Path|np.ndarray]):
 
     return arr_bgr, arr_mask
 
+def get_cropped_from_alpha(img_path):
+    img_raw = Image.open(img_path)
+    bbox = img_raw.getbbox()# (left, top, right, bottom)
+    if bbox:
+        cropped = img_raw.crop(bbox)
+        return cv2.cvtColor(np.array(cropped), cv2.COLOR_RGB2BGRA)
+    return cv2.cvtColor(np.array(img_raw), cv2.COLOR_RGB2BGRA)
 
+def get_croppeds_from_strs(img_paths:list[str]):
+    imgs = []
+    for img_path in img_paths:
+        cropped = get_cropped_from_alpha(img_path)
+        imgs.append(cropped)
+    return imgs
+
+def get_cropped_from_Paths(img_paths:list[Path]):
+    imgs = []
+    for img_path in img_paths:
+        cropped = get_cropped_from_alpha(str(img_path))
+        imgs.append(cropped)
+    return imgs
